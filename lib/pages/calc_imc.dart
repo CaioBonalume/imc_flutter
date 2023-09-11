@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:imc_flutter/model/registro_model.dart';
 import 'package:imc_flutter/repositories/registros_repository.dart';
+import 'package:imc_flutter/services/app_storage_service.dart';
 import 'package:imc_flutter/shared/widgets/logica_imc.dart';
 import 'package:imc_flutter/shared/widgets/resultados_imc.dart';
 import 'package:imc_flutter/shared/widgets/titulo_categoria.dart';
@@ -14,6 +15,9 @@ class CalculadoraIMC extends StatefulWidget {
 }
 
 class _CalculadoraIMCState extends State<CalculadoraIMC> {
+  //Serviços de Salvamento
+  AppStorageService storageService = AppStorageService();
+
   TextEditingController pesoController = TextEditingController();
   TextEditingController alturaController = TextEditingController();
   TextEditingController dataController = TextEditingController();
@@ -26,6 +30,15 @@ class _CalculadoraIMCState extends State<CalculadoraIMC> {
   @override
   void initState() {
     super.initState();
+    loadData();
+  }
+
+  loadData() async {
+    // Uso de SharedPreferences
+    alturaController.text =
+        (await storageService.getDadosCadastraisAltura()).toString();
+
+    // Uso de SQLite
   }
 
   @override
@@ -71,8 +84,7 @@ class _CalculadoraIMCState extends State<CalculadoraIMC> {
                 const InputDecoration(counterText: '', hintText: '72.6'),
             controller: pesoController,
           ),
-          const SizedBox(height: 20),
-          const SizedBox(height: 30),
+          const SizedBox(height: 50),
           TextButton(
               style: TextButton.styleFrom(
                 backgroundColor: Colors.white,
@@ -96,6 +108,8 @@ class _CalculadoraIMCState extends State<CalculadoraIMC> {
                   ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Digite uma peso')));
                 }
+                await storageService.setDadosCadastraisAltura(
+                    double.parse(alturaController.text));
                 await registroRepository
                     .add(RegistroModel(dataRegistro, pesoController.text,
                         alturaController.text))
